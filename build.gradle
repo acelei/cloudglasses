@@ -77,6 +77,16 @@ allprojects {
     jar {
         enabled = true
     }
+
+    task createJavaProject << {
+        sourceSets*.java.srcDirs*.each { it.mkdirs() }
+        sourceSets*.resources.srcDirs*.each { it.mkdirs() }
+    }
+
+    task createWebProject(dependsOn: 'createJavaProject') << {
+        def webAppDir = file("$webAppDirName")
+        webAppDir.mkdirs()
+    }
 }
 
 subprojects {
@@ -87,14 +97,4 @@ subprojects {
 
 dependencies {
     compile project(':web')
-}
-
-task createJavaProject << {
-    sourceSets*.java.srcDirs*.each { it.mkdirs() }
-    sourceSets*.resources.srcDirs*.each { it.mkdirs() }
-}
-
-task createWebProject(dependsOn: 'createJavaProject') << {
-    def webAppDir = file("$webAppDirName")
-    webAppDir.mkdirs()
 }

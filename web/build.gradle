@@ -1,0 +1,9 @@
+dependencies {
+    compile project(':core')
+
+    //compile "com.corundumstudio.socketio:netty-socketio:1.7.14"
+}
+
+jar.into('META-INF/resources') {
+    from('src/main/webapp')
+}

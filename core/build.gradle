@@ -1,0 +1,7 @@
+dependencies {
+    compile project(':entity')
+
+    compile "org.springframework.boot:spring-boot-starter-aop:$springBootVersion"
+    compile "com.alibaba:transmittable-thread-local:2.3.1"
+    compile "org.apache.poi:poi-ooxml:3.17"
+}

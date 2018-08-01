@@ -1,0 +1,8 @@
+dependencies {
+    compile "org.springframework.boot:spring-boot:$springBootVersion",
+            "org.springframework.boot:spring-boot-starter-data-jpa:$springBootVersion",
+            'commons-io:commons-io:2.6'
+    // DB
+    compile "mysql:mysql-connector-java:5.1.46",
+            "com.alibaba:druid:1.1.10"
+}

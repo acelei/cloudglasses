@@ -1,0 +1,100 @@
+buildscript {
+    ext {
+        springBootVersion = '2.0.2.RELEASE'
+        env = System.getProperty("env") ?: "dev"
+    }
+    repositories {
+        mavenCentral()
+        maven { url 'https://repo.spring.io/libs-snapshot' }
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion"
+    }
+}
+
+allprojects {
+    group 'cloudglasses'
+    version = '1.0.0'
+
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
+
+    repositories {
+        maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
+        // 使用本地maven库
+        mavenLocal()
+        // 使用中央mav库
+        mavenCentral()
+    }
+
+    configurations {
+        all*.exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+
+        all {
+            resolutionStrategy {
+                // 出现版本冲突时报错 默认使用的是Newest
+                failOnVersionConflict()
+                // 自定义模块优先
+                preferProjectModules()
+                // 有效期10分钟
+                cacheDynamicVersionsFor 10, 'minutes'
+                // 有效期4小时
+                cacheChangingModulesFor 4, 'hours'
+            }
+        }
+        sourceSets {
+            main {
+                resources {
+                    srcDirs = ["src/main/resources", "src/main/profile/$env"]
+                }
+            }
+        }
+    }
+
+    dependencies {
+        // 使用spock时不使用内部groovy
+        testCompile("org.spockframework:spock-core:1.1-groovy-2.4")
+
+        // mock时需要动态代理包
+        testCompile "cglib:cglib:3.2.6"
+
+        // Spring Framework
+        testCompile "org.springframework.boot:spring-boot-starter-test:$springBootVersion"
+
+        // springboot热部署
+        compile "org.springframework.boot:spring-boot-devtools:$springBootVersion",
+                "org.springframework.boot:spring-boot-starter-web:$springBootVersion"
+        // undertow支持
+        runtime "org.springframework.boot:spring-boot-starter-undertow:$springBootVersion"
+    }
+
+    jar {
+        enabled = true
+    }
+}
+
+subprojects {
+    bootJar {
+        enabled = false
+    }
+}
+
+dependencies {
+    compile project(':web')
+}
+
+task createJavaProject << {
+    sourceSets*.java.srcDirs*.each { it.mkdirs() }
+    sourceSets*.resources.srcDirs*.each { it.mkdirs() }
+}
+
+task createWebProject(dependsOn: 'createJavaProject') << {
+    def webAppDir = file("$webAppDirName")
+    webAppDir.mkdirs()
+}

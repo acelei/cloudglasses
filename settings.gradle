@@ -2,4 +2,5 @@ rootProject.name = 'cloudglasses'
 include 'entity'
 include 'web'
 include 'core'
+include 'weixin-api'
 

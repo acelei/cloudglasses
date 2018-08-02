@@ -90,6 +90,7 @@ subprojects {
 
 dependencies {
     compile project(':web')
+    compile project(':weixin')
 }
 
 task createJavaProject << {

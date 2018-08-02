@@ -28,3 +28,8 @@ spring:
 logging:
   level:
     com.cloudglasses: info
+weixin:
+  appid: wxed50394fb45facbf
+  secret: ee4e8f0477efc0fd808554e03d907d49
+  token:
+  aesKey:

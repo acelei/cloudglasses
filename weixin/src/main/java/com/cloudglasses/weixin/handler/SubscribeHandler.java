@@ -1,5 +1,7 @@
 package com.cloudglasses.weixin.handler;
 
+import com.cloudglasses.model.WeixinUser;
+import com.cloudglasses.repository.WeixinUserRepository;
 import com.cloudglasses.weixin.builder.TextBuilder;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.common.session.WxSessionManager;
@@ -7,6 +9,8 @@ import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlOutMessage;
 import me.chanjar.weixin.mp.bean.result.WxMpUser;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -16,6 +20,9 @@ import java.util.Map;
  */
 @Component
 public class SubscribeHandler extends AbstractHandler {
+    @Autowired
+    private WeixinUserRepository weixinUserRepository;
+
 
     @Override
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage,
@@ -26,10 +33,10 @@ public class SubscribeHandler extends AbstractHandler {
 
         // 获取微信用户基本信息
         WxMpUser userWxInfo = weixinService.getUserService()
-                .userInfo(wxMessage.getFromUser(), null);
+                .userInfo(wxMessage.getFromUser());
 
         if (userWxInfo != null) {
-            // TODO 可以添加关注用户到本地
+            weixinUserRepository.save(getWeixinUser(userWxInfo));
         }
 
         WxMpXmlOutMessage responseResult = null;
@@ -61,4 +68,10 @@ public class SubscribeHandler extends AbstractHandler {
         return null;
     }
 
+
+    private WeixinUser getWeixinUser(WxMpUser userWxInfo) {
+        WeixinUser weixinUser = new WeixinUser();
+        BeanUtils.copyProperties(userWxInfo, weixinUser);
+        return weixinUser;
+    }
 }

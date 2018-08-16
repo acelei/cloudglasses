@@ -2,7 +2,7 @@ package com.cloudglasses.weixin.handler;
 
 import com.cloudglasses.model.WeixinUser;
 import com.cloudglasses.repository.WeixinUserRepository;
-import com.cloudglasses.util.CodeUtil;
+import com.cloudglasses.util.CodeUtile;
 import com.cloudglasses.util.ValidateUtile;
 import com.cloudglasses.weixin.builder.TextBuilder;
 import me.chanjar.weixin.common.session.WxSessionManager;
@@ -58,7 +58,7 @@ public class MsgHandler extends AbstractHandler {
     private WxMpXmlOutMessage getMobileCodeByMobileText(WxMpXmlMessage wxMessage, WxMpService weixinService, String openid, String messageContent) {
         String mobile = messageContent.replace("关联手机号", "");
         if (ValidateUtile.isPhone(mobile)) {
-            String code = CodeUtil.generateCode();
+            String code = CodeUtile.generateCode();
             keyMap.put(openid, new MobileCode(code, mobile));
             // TODO 发送验证码
 
@@ -103,7 +103,7 @@ public class MsgHandler extends AbstractHandler {
         MobileCode mobileCode = keyMap.get(openid);
         keyMap.remove(openid);
         if (mobileCode != null && (messageContent.equals(mobileCode.key) || ("Yes".equals(messageContent) && mobileCode.key.equals(mobileCode.mobile)))) {
-            WeixinUser user = weixinUserRepository.findFirstByOpenid(openid);
+            WeixinUser user = weixinUserRepository.findById(openid).get();
             user.setMobile(mobileCode.mobile);
             weixinUserRepository.save(user);
             return new TextBuilder().build("关联成功!", wxMessage, weixinService);

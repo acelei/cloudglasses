@@ -7,6 +7,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface WeixinUserRepository extends JpaRepository<WeixinUser, Long>, JpaSpecificationExecutor<OptometryDetail> {
-    WeixinUser findFirstByOpenid(String openid);
+public interface WeixinUserRepository extends JpaRepository<WeixinUser, String>, JpaSpecificationExecutor<OptometryDetail> {
 }

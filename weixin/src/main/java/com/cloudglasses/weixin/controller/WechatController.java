@@ -1,7 +1,9 @@
 package com.cloudglasses.weixin.controller;
 
+import com.cloudglasses.model.SystemConfig;
 import com.cloudglasses.model.WeixinUser;
 import com.cloudglasses.repository.OptometryDetailRepository;
+import com.cloudglasses.repository.SystemConfigRepository;
 import com.cloudglasses.repository.WeixinUserRepository;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpMenuService;
@@ -11,12 +13,16 @@ import me.chanjar.weixin.mp.bean.menu.WxMpGetSelfMenuInfoResult;
 import me.chanjar.weixin.mp.bean.menu.WxMpSelfMenuInfo;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlOutMessage;
+import me.chanjar.weixin.mp.bean.result.WxMpUser;
+import me.chanjar.weixin.mp.bean.result.WxMpUserList;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 /**
@@ -31,6 +37,8 @@ public class WechatController {
     private WxMpService wxService;
     @Autowired
     private WxMpMessageRouter router;
+    @Autowired
+    private SystemConfigRepository systemConfigRepository;
     @Autowired
     private WeixinUserRepository weixinUserRepository;
     @Autowired
@@ -120,6 +128,27 @@ public class WechatController {
         return "success";
     }
 
+    @GetMapping("users")
+    @Transactional(rollbackOn = Exception.class)
+    public String getAllUsers() throws WxErrorException {
+        SystemConfig nextOpenidConfig = systemConfigRepository.findById("nextOpenid").get();
+        WxMpUserList wxMpUserList = wxService.getUserService().userList(nextOpenidConfig.getCfgValue());
+
+        if (wxMpUserList.getOpenids().size()>0){
+            List<WxMpUser> wxMpUsers = wxService.getUserService().userInfoList(wxMpUserList.getOpenids());
+
+            for (WxMpUser wxMpUser : wxMpUsers) {
+                WeixinUser weixinUser = getWeixinUser(wxMpUser);
+                weixinUserRepository.save(weixinUser);
+            }
+
+            nextOpenidConfig.setCfgValue(wxMpUserList.getNextOpenid());
+            systemConfigRepository.save(nextOpenidConfig);
+        }
+
+        return "success";
+    }
+
     @GetMapping("test")
     public String text() {
         List<WeixinUser> users = weixinUserRepository.findAll();
@@ -134,5 +163,12 @@ public class WechatController {
         }
 
         return null;
+    }
+
+    private WeixinUser getWeixinUser(WxMpUser userWxInfo) {
+        WeixinUser weixinUser = new WeixinUser();
+        BeanUtils.copyProperties(userWxInfo, weixinUser);
+
+        return weixinUser;
     }
 }

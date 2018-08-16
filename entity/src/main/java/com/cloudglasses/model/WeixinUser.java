@@ -7,12 +7,9 @@ import java.util.Set;
 @Entity
 public class WeixinUser implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String openId;
     @Column
-    private String openid;
-    @Column
-    private String unionid;
+    private String unionId;
     @Column
     private String mobile;
     @Column
@@ -20,8 +17,7 @@ public class WeixinUser implements Serializable {
     @Column
     private String nickname;
     @Column
-    @Enumerated(value = EnumType.ORDINAL)
-    private Sex sex;
+    private Integer sex;
     @Column
     private String language;
     @Column
@@ -31,7 +27,7 @@ public class WeixinUser implements Serializable {
     @Column
     private String country;
     @Column
-    private String headimgurl;
+    private String headImgUrl;
     @Column
     private Long subscribeTime;
     @Column
@@ -40,28 +36,20 @@ public class WeixinUser implements Serializable {
     @JoinColumn(name = "mobile", referencedColumnName = "mobile")
     private Set<OptometryDetail> optometryDetails;
 
-    public Long getId() {
-        return id;
+    public String getOpenId() {
+        return openId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setOpenId(String openId) {
+        this.openId = openId;
     }
 
-    public String getOpenid() {
-        return openid;
+    public String getUnionId() {
+        return unionId;
     }
 
-    public void setOpenid(String openid) {
-        this.openid = openid;
-    }
-
-    public String getUnionid() {
-        return unionid;
-    }
-
-    public void setUnionid(String unionid) {
-        this.unionid = unionid;
+    public void setUnionId(String unionId) {
+        this.unionId = unionId;
     }
 
     public String getMobile() {
@@ -88,11 +76,11 @@ public class WeixinUser implements Serializable {
         this.nickname = nickname;
     }
 
-    public Sex getSex() {
+    public Integer getSex() {
         return sex;
     }
 
-    public void setSex(Sex sex) {
+    public void setSex(Integer sex) {
         this.sex = sex;
     }
 
@@ -128,12 +116,12 @@ public class WeixinUser implements Serializable {
         this.country = country;
     }
 
-    public String getHeadimgurl() {
-        return headimgurl;
+    public String getHeadImgUrl() {
+        return headImgUrl;
     }
 
-    public void setHeadimgurl(String headimgurl) {
-        this.headimgurl = headimgurl;
+    public void setHeadImgUrl(String headImgUrl) {
+        this.headImgUrl = headImgUrl;
     }
 
     public Long getSubscribeTime() {

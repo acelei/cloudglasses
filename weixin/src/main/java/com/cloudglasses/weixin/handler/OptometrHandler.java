@@ -24,7 +24,7 @@ public class OptometrHandler extends AbstractHandler {
 
     @Override
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage, Map<String, Object> context, WxMpService wxMpService, WxSessionManager sessionManager) throws WxErrorException {
-        WeixinUser user = weixinUserRepository.findFirstByOpenid(wxMessage.getToUser());
+        WeixinUser user = weixinUserRepository.findById(wxMessage.getToUser()).get();
         OptometryDetail optometryDetail = user.getOptometryDetails().stream()
                 .filter(OptometryDetail::getStatus)
                 .max(Comparator.comparing(OptometryDetail::getCreateTime))

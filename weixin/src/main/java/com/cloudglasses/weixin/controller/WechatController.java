@@ -1,7 +1,14 @@
 package com.cloudglasses.weixin.controller;
 
+import com.cloudglasses.model.WeixinUser;
+import com.cloudglasses.repository.OptometryDetailRepository;
+import com.cloudglasses.repository.WeixinUserRepository;
+import me.chanjar.weixin.common.error.WxErrorException;
+import me.chanjar.weixin.mp.api.WxMpMenuService;
 import me.chanjar.weixin.mp.api.WxMpMessageRouter;
 import me.chanjar.weixin.mp.api.WxMpService;
+import me.chanjar.weixin.mp.bean.menu.WxMpGetSelfMenuInfoResult;
+import me.chanjar.weixin.mp.bean.menu.WxMpSelfMenuInfo;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlOutMessage;
 import org.apache.commons.lang3.StringUtils;
@@ -9,6 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @author Binary Wang(https://github.com/binarywang)
@@ -20,9 +29,12 @@ public class WechatController {
 
     @Autowired
     private WxMpService wxService;
-
     @Autowired
     private WxMpMessageRouter router;
+    @Autowired
+    private WeixinUserRepository weixinUserRepository;
+    @Autowired
+    private OptometryDetailRepository optometryDetailsRepository;
 
     @GetMapping(produces = "text/plain;charset=utf-8")
     public String authGet(
@@ -93,6 +105,25 @@ public class WechatController {
         this.logger.debug("\n组装回复信息：{}", out);
 
         return out;
+    }
+
+    @GetMapping("menu/create")
+    public String createMenu() throws WxErrorException {
+        WxMpMenuService menuService = wxService.getMenuService();
+        WxMpGetSelfMenuInfoResult selfMenuInfoResult = menuService.getSelfMenuInfo();
+        WxMpSelfMenuInfo selfMenuInfo = selfMenuInfoResult.getSelfMenuInfo();
+
+        if (selfMenuInfo == null) {
+            menuService.menuCreate("{\"button\":[{\"type\":\"click\",\"name\":\"验光单\",\"key\":\"B1001_OPTOMETRY\"}]}");
+        }
+
+        return "success";
+    }
+
+    @GetMapping("test")
+    public String text() {
+        List<WeixinUser> users = weixinUserRepository.findAll();
+        return "success";
     }
 
     private WxMpXmlOutMessage route(WxMpXmlMessage message) {

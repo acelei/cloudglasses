@@ -9,7 +9,6 @@ import me.chanjar.weixin.mp.api.WxMpConfigStorage;
 import me.chanjar.weixin.mp.api.WxMpInMemoryConfigStorage;
 import me.chanjar.weixin.mp.api.WxMpMessageRouter;
 import me.chanjar.weixin.mp.api.WxMpService;
-import me.chanjar.weixin.mp.api.impl.WxMpMenuServiceImpl;
 import me.chanjar.weixin.mp.api.impl.WxMpServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -35,7 +34,7 @@ public class WeiXinConfig {
     @Autowired
     private SubscribeHandler subscribeHandler;
     @Autowired
-    private MenuHandler menuHandler;
+    private OptometrHandler optometrHandler;
 
     @Bean
     @ConditionalOnMissingBean
@@ -57,16 +56,6 @@ public class WeiXinConfig {
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    public WxMpMenuServiceImpl configStorage(WxMpService wxMpService) throws WxErrorException {
-        WxMpMenuServiceImpl wxMpMenuService = new WxMpMenuServiceImpl(wxMpService);
-        // TODO 创建菜单
-        wxMpMenuService.menuGet();
-
-        return wxMpMenuService;
-    }
-
-    @Bean
     public WxMpMessageRouter router(WxMpService wxMpService) throws WxErrorException {
 
         final WxMpMessageRouter newRouter = new WxMpMessageRouter(wxMpService);
@@ -75,25 +64,38 @@ public class WeiXinConfig {
         newRouter.rule().handler(this.logHandler).next();
 
         // 点击菜单连接事件
-        newRouter.rule().async(false).msgType(XmlMsgType.EVENT)
-                .event(MenuButtonType.VIEW).handler(this.nullHandler).end();
+        newRouter.rule().async(false)
+                .msgType(XmlMsgType.EVENT)
+                .event(MenuButtonType.VIEW)
+                .handler(nullHandler)
+                .end();
 
         // 自定义菜单事件
-        newRouter.rule().async(false).msgType(XmlMsgType.EVENT)
-                .event(MenuButtonType.CLICK).handler(this.menuHandler).end();
+        newRouter.rule().async(false)
+                .msgType(XmlMsgType.EVENT)
+                .event(MenuButtonType.CLICK)
+                .eventKey(OptometrHandler.BUTTON_KEY)
+                .handler(optometrHandler)
+                .end();
 
         // 关注事件
-        newRouter.rule().async(false).msgType(XmlMsgType.EVENT)
-                .event(EventType.SUBSCRIBE).handler(this.subscribeHandler)
+        newRouter.rule().async(false)
+                .msgType(XmlMsgType.EVENT)
+                .event(EventType.SUBSCRIBE)
+                .handler(subscribeHandler)
                 .end();
 
         // 取消关注事件
-        newRouter.rule().async(false).msgType(XmlMsgType.EVENT)
+        newRouter.rule().async(false)
+                .msgType(XmlMsgType.EVENT)
                 .event(EventType.UNSUBSCRIBE)
-                .handler(this.unsubscribeHandler).end();
+                .handler(this.unsubscribeHandler)
+                .end();
 
         // 默认
-        newRouter.rule().async(false).handler(this.msgHandler).end();
+        newRouter.rule().async(false)
+                .handler(msgHandler)
+                .end();
 
         return newRouter;
     }

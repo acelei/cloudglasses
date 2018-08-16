@@ -25,6 +25,7 @@ spring:
     initConnectionSqls: set NAMES utf8mb4;
   jpa:
     open-in-view: true
+    show-sql: true
 logging:
   level:
     com.cloudglasses: info

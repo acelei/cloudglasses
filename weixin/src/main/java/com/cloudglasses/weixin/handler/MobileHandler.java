@@ -6,6 +6,7 @@ import com.cloudglasses.util.CodeUtile;
 import com.cloudglasses.util.ValidateUtile;
 import com.cloudglasses.weixin.builder.TextBuilder;
 import com.cloudglasses.weixin.service.OptometryDetailService;
+import com.cloudglasses.weixin.service.SmsService;
 import me.chanjar.weixin.common.session.WxSessionManager;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
@@ -25,6 +26,8 @@ public class MobileHandler extends AbstractHandler {
     private WeixinUserRepository weixinUserRepository;
     @Autowired
     private OptometryDetailService optometryDetailService;
+    @Autowired
+    private SmsService smsService;
 
     @Override
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage,
@@ -37,7 +40,12 @@ public class MobileHandler extends AbstractHandler {
         if ("1".equals(messageContent)) {
             return relationMobile(wxMessage, weixinService, openid, messageContent);
         } else {
-            return getMobileCodeByWeixinText(wxMessage, weixinService, openid, messageContent);
+//            try {
+//                return getMobileCodeByMobileText(wxMessage, weixinService, openid, messageContent);
+//            } catch (Exception e) {
+//                logger.error("短信发送失败", e);
+                return getMobileCodeByWeixinText(wxMessage, weixinService, openid, messageContent);
+//            }
         }
     }
 
@@ -52,13 +60,12 @@ public class MobileHandler extends AbstractHandler {
      * @param messageContent
      * @return
      */
-    private WxMpXmlOutMessage getMobileCodeByMobileText(WxMpXmlMessage wxMessage, WxMpService weixinService, String openid, String messageContent) {
+    private WxMpXmlOutMessage getMobileCodeByMobileText(WxMpXmlMessage wxMessage, WxMpService weixinService, String openid, String messageContent) throws Exception {
         String mobile = messageContent.replace("验光", "");
         if (ValidateUtile.isPhone(mobile)) {
             String code = CodeUtile.generateCode();
             keyMap.put(openid, new MobileCode(code, mobile));
-            // TODO 发送验证码
-
+            smsService.sendCode(mobile, code);
             return new TextBuilder().build("请回复验证码", wxMessage, weixinService);
         } else {
             return new TextBuilder().build("手机号格式有误!", wxMessage, weixinService);

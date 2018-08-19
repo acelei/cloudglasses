@@ -1,6 +1,7 @@
 package com.cloudglasses.weixin.config;
 
 import com.cloudglasses.weixin.handler.*;
+import com.cloudglasses.weixin.service.SmsService;
 import me.chanjar.weixin.common.api.WxConsts.EventType;
 import me.chanjar.weixin.common.api.WxConsts.MenuButtonType;
 import me.chanjar.weixin.common.api.WxConsts.XmlMsgType;
@@ -17,11 +18,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.Arrays;
-
 @Configuration
 @ConditionalOnClass(WxMpService.class)
-@EnableConfigurationProperties(WechatMpProperties.class)
+@EnableConfigurationProperties({WechatMpProperties.class, SmsProperties.class})
 public class WeiXinConfig {
     @Autowired
     private WechatMpProperties properties;
@@ -133,5 +132,10 @@ public class WeiXinConfig {
                 .end();
 
         return newRouter;
+    }
+
+    @Bean
+    public SmsService configSmsService(SmsProperties configStorage) {
+        return new SmsService(configStorage);
     }
 }

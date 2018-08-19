@@ -33,3 +33,7 @@ weixin:
   secret: 6e7581bfbee2ff3807158c1b49f49a5e
   token: cloudglasses2018
   aesKey: 9MidPZtZnlBXYOZMPdBcpAZP9mIEpsHESx5yqjpGIjR
+sms:
+  appid: 1400128270
+  appkey: a65e78449f7f58b8146f08dfa02cca42
+  smsSign: 云镜

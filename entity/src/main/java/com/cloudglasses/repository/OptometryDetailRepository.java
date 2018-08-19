@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface OptometryDetailRepository extends JpaRepository<OptometryDetail, Long>, JpaSpecificationExecutor<OptometryDetail> {
+    OptometryDetail findFirstByMobileAndStatusTrueOrderByCreateTimeDesc(String mobile);
 }

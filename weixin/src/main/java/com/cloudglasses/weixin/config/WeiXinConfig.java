@@ -17,6 +17,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Arrays;
+
 @Configuration
 @ConditionalOnClass(WxMpService.class)
 @EnableConfigurationProperties(WechatMpProperties.class)
@@ -28,13 +30,17 @@ public class WeiXinConfig {
     @Autowired
     protected NullHandler nullHandler;
     @Autowired
-    private MsgHandler msgHandler;
+    private MobileHandler mobileHandler;
     @Autowired
     private UnsubscribeHandler unsubscribeHandler;
     @Autowired
     private SubscribeHandler subscribeHandler;
     @Autowired
     private OptometrHandler optometrHandler;
+    @Autowired
+    private MsgHandler msgHandler;
+    @Autowired
+    private ButtonHandler buttonHandler;
 
     @Bean
     @ConditionalOnMissingBean
@@ -70,11 +76,28 @@ public class WeiXinConfig {
                 .handler(nullHandler)
                 .end();
 
+
         // 自定义菜单事件
         newRouter.rule().async(false)
                 .msgType(XmlMsgType.EVENT)
                 .event(MenuButtonType.CLICK)
                 .eventKey(OptometrHandler.BUTTON_KEY)
+                .handler(optometrHandler)
+                .end();
+
+        for (String buttonKey : ButtonHandler.BUTTON_KEYS) {
+            newRouter.rule().async(false)
+                    .msgType(XmlMsgType.EVENT)
+                    .event(MenuButtonType.CLICK)
+                    .eventKey(buttonKey)
+                    .handler(buttonHandler)
+                    .end();
+        }
+
+        // 获取验光单
+        newRouter.rule().async(false)
+                .msgType(XmlMsgType.TEXT)
+                .rContent("验光单$")
                 .handler(optometrHandler)
                 .end();
 
@@ -92,8 +115,20 @@ public class WeiXinConfig {
                 .handler(this.unsubscribeHandler)
                 .end();
 
-        // 默认
+        // 关联手机号
         newRouter.rule().async(false)
+                .rContent("验光\\d+")
+                .handler(mobileHandler)
+                .end();
+        newRouter.rule().async(false)
+                .content("1")
+                .handler(mobileHandler)
+                .end();
+
+        // 默认事件
+        newRouter.rule().async(false)
+                .msgType(XmlMsgType.TEXT)
+                .event(EventType.CLICK)
                 .handler(msgHandler)
                 .end();
 

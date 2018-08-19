@@ -29,8 +29,8 @@ public class OptometryDetail implements Serializable {
     private Float visionR;
     @Column(name = "vision_l")
     private Float visionL;
-    @Column(name = "[type]")
-    private Integer type;
+    @Column
+    private String address;
     @Column
     private Date createTime;
     @Column
@@ -126,12 +126,12 @@ public class OptometryDetail implements Serializable {
         this.visionL = visionL;
     }
 
-    public Integer getType() {
-        return type;
+    public String getAddress() {
+        return address;
     }
 
-    public void setType(Integer type) {
-        this.type = type;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public Date getCreateTime() {

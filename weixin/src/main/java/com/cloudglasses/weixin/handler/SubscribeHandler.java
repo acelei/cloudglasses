@@ -3,6 +3,7 @@ package com.cloudglasses.weixin.handler;
 import com.cloudglasses.model.WeixinUser;
 import com.cloudglasses.repository.WeixinUserRepository;
 import com.cloudglasses.weixin.builder.TextBuilder;
+import com.cloudglasses.weixin.service.WeixinUserService;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.common.session.WxSessionManager;
 import me.chanjar.weixin.mp.api.WxMpService;
@@ -21,7 +22,7 @@ import java.util.Map;
 @Component
 public class SubscribeHandler extends AbstractHandler {
     @Autowired
-    private WeixinUserRepository weixinUserRepository;
+    private WeixinUserService weixinUserService;
 
 
     @Override
@@ -31,13 +32,8 @@ public class SubscribeHandler extends AbstractHandler {
 
         this.logger.info("新关注用户 OPENID: " + wxMessage.getFromUser());
 
-        // 获取微信用户基本信息
-        WxMpUser userWxInfo = weixinService.getUserService()
-                .userInfo(wxMessage.getFromUser());
-
-        if (userWxInfo != null) {
-            weixinUserRepository.save(getWeixinUser(userWxInfo));
-        }
+        // 保存获取用户基本信息
+        weixinUserService.save(wxMessage.getFromUser());
 
         WxMpXmlOutMessage responseResult = null;
         try {

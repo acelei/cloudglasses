@@ -2,19 +2,18 @@ package com.cloudglasses.weixin.controller;
 
 import com.cloudglasses.model.SystemConfig;
 import com.cloudglasses.model.WeixinUser;
-import com.cloudglasses.repository.OptometryDetailRepository;
 import com.cloudglasses.repository.SystemConfigRepository;
-import com.cloudglasses.repository.WeixinUserRepository;
+import com.cloudglasses.weixin.service.WeixinUserService;
+import me.chanjar.weixin.common.api.WxConsts;
 import me.chanjar.weixin.common.error.WxErrorException;
-import me.chanjar.weixin.mp.api.WxMpMenuService;
 import me.chanjar.weixin.mp.api.WxMpMessageRouter;
 import me.chanjar.weixin.mp.api.WxMpService;
-import me.chanjar.weixin.mp.bean.menu.WxMpGetSelfMenuInfoResult;
-import me.chanjar.weixin.mp.bean.menu.WxMpSelfMenuInfo;
+import me.chanjar.weixin.mp.bean.material.WxMpMaterialFileBatchGetResult;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlOutMessage;
 import me.chanjar.weixin.mp.bean.result.WxMpUser;
 import me.chanjar.weixin.mp.bean.result.WxMpUserList;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +22,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Binary Wang(https://github.com/binarywang)
@@ -40,9 +42,7 @@ public class WechatController {
     @Autowired
     private SystemConfigRepository systemConfigRepository;
     @Autowired
-    private WeixinUserRepository weixinUserRepository;
-    @Autowired
-    private OptometryDetailRepository optometryDetailsRepository;
+    private WeixinUserService weixinUserService;
 
     @GetMapping(produces = "text/plain;charset=utf-8")
     public String authGet(
@@ -117,14 +117,15 @@ public class WechatController {
 
     @GetMapping("menu/create")
     public String createMenu() throws WxErrorException {
-        WxMpMenuService menuService = wxService.getMenuService();
-        WxMpGetSelfMenuInfoResult selfMenuInfoResult = menuService.getSelfMenuInfo();
-        WxMpSelfMenuInfo selfMenuInfo = selfMenuInfoResult.getSelfMenuInfo();
-
-        if (selfMenuInfo == null) {
-            menuService.menuCreate("{\"button\":[{\"type\":\"click\",\"name\":\"验光单\",\"key\":\"B1001_OPTOMETRY\"}]}");
+        File menuFile = new File("menu.json");
+        if (menuFile.exists()) {
+            try {
+                String input = FileUtils.readFileToString(menuFile, "UTF-8");
+                wxService.getMenuService().menuCreate(input);
+            } catch (IOException e) {
+                logger.error("读取菜单json错误", e);
+            }
         }
-
         return "success";
     }
 
@@ -134,12 +135,11 @@ public class WechatController {
         SystemConfig nextOpenidConfig = systemConfigRepository.findById("nextOpenid").get();
         WxMpUserList wxMpUserList = wxService.getUserService().userList(nextOpenidConfig.getCfgValue());
 
-        if (wxMpUserList.getOpenids().size()>0){
+        if (wxMpUserList.getOpenids().size() > 0) {
             List<WxMpUser> wxMpUsers = wxService.getUserService().userInfoList(wxMpUserList.getOpenids());
 
             for (WxMpUser wxMpUser : wxMpUsers) {
-                WeixinUser weixinUser = getWeixinUser(wxMpUser);
-                weixinUserRepository.save(weixinUser);
+                weixinUserService.save(wxMpUser);
             }
 
             nextOpenidConfig.setCfgValue(wxMpUserList.getNextOpenid());
@@ -150,8 +150,22 @@ public class WechatController {
     }
 
     @GetMapping("test")
-    public String text() {
-        List<WeixinUser> users = weixinUserRepository.findAll();
+    public String text() throws WxErrorException {
+        WxMpMaterialFileBatchGetResult wxMpMaterialFileBatchGetResult = wxService.getMaterialService().materialFileBatchGet(WxConsts.MaterialType.NEWS, 0, 20);
+
+        List<String> collect = wxMpMaterialFileBatchGetResult.getItems().stream().map(item -> {
+            String mediaId = item.getMediaId();
+            String title = "";
+            try {
+                title = wxService.getMaterialService().materialNewsInfo(mediaId).getArticles().get(0).getTitle();
+            } catch (WxErrorException e) {
+                logger.error("获取素材失败", e);
+            }
+
+            return title + ":" + mediaId;
+        }).collect(Collectors.toList());
+
+        logger.info(collect.toString());
         return "success";
     }
 

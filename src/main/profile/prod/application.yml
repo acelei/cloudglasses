@@ -29,7 +29,7 @@ logging:
   level:
     com.cloudglasses: info
 weixin:
-  appid: wxed50394fb45facbf
-  secret: ee4e8f0477efc0fd808554e03d907d49
+  appid: wx8587fd25a63e8242
+  secret: 6e7581bfbee2ff3807158c1b49f49a5e
   token: cloudglasses2018
-  aesKey:
+  aesKey: 9MidPZtZnlBXYOZMPdBcpAZP9mIEpsHESx5yqjpGIjR

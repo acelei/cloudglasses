@@ -14,7 +14,7 @@ import java.util.Random;
 public class CodeUtile {
     private static int width = 90;// 定义图片的width
     private static int height = 20;// 定义图片的height
-    private static int codeCount = 4;// 定义图片上显示验证码的个数
+    private static int codeCount = 6;// 定义图片上显示验证码的个数
     private static int xx = 15;
     private static int fontHeight = 18;
     private static int codeY = 16;
@@ -90,7 +90,18 @@ public class CodeUtile {
         Random random = new Random();
         for (int i = 0; i < codeCount; i++) {
             // 得到随机产生的验证码数字。
-            String code = String.valueOf(codeSequence[random.nextInt(36)]);
+            String code = String.valueOf(codeSequence[random.nextInt(codeSequence.length)]);
+            sb.append(code);
+        }
+        return sb.toString();
+    }
+
+    public static String generateInt() {
+        StringBuilder sb = new StringBuilder();
+        Random random = new Random();
+        for (int i = 0; i < codeCount; i++) {
+            // 得到随机产生的验证码数字。
+            String code = String.valueOf(random.nextInt(10));
             sb.append(code);
         }
         return sb.toString();

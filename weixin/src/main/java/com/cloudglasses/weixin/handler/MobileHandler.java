@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 
 @Component
@@ -37,15 +38,17 @@ public class MobileHandler extends AbstractHandler {
 
         //判断用户是否在关联手机号
         String messageContent = wxMessage.getContent();
-        if ("1".equals(messageContent)) {
+
+        String REGEX_CODE = "^[0-9]{4}$";
+        if ("1".equals(messageContent) || Pattern.matches(REGEX_CODE, messageContent)) {
             return relationMobile(wxMessage, weixinService, openid, messageContent);
         } else {
-//            try {
-//                return getMobileCodeByMobileText(wxMessage, weixinService, openid, messageContent);
-//            } catch (Exception e) {
-//                logger.error("短信发送失败", e);
+            try {
+                return getMobileCodeByMobileText(wxMessage, weixinService, openid, messageContent);
+            } catch (Exception e) {
+                logger.error("短信发送失败", e);
                 return getMobileCodeByWeixinText(wxMessage, weixinService, openid, messageContent);
-//            }
+            }
         }
     }
 
@@ -63,7 +66,7 @@ public class MobileHandler extends AbstractHandler {
     private WxMpXmlOutMessage getMobileCodeByMobileText(WxMpXmlMessage wxMessage, WxMpService weixinService, String openid, String messageContent) throws Exception {
         String mobile = messageContent.replace("验光", "");
         if (ValidateUtile.isPhone(mobile)) {
-            String code = CodeUtile.generateCode();
+            String code = CodeUtile.generateInt();
             keyMap.put(openid, new MobileCode(code, mobile));
             smsService.sendCode(mobile, code);
             return new TextBuilder().build("请回复验证码", wxMessage, weixinService);
@@ -106,7 +109,7 @@ public class MobileHandler extends AbstractHandler {
     private WxMpXmlOutMessage relationMobile(WxMpXmlMessage wxMessage, WxMpService weixinService, String openid, String messageContent) {
         MobileCode mobileCode = keyMap.get(openid);
         keyMap.remove(openid);
-        if (mobileCode != null && (messageContent.equals(mobileCode.key) || ("1".equalsIgnoreCase(messageContent) && mobileCode.key.equals(mobileCode.mobile)))) {
+        if (mobileCode != null && (messageContent.equalsIgnoreCase(mobileCode.key) || ("1".equalsIgnoreCase(messageContent) && mobileCode.key.equals(mobileCode.mobile)))) {
             WeixinUser user = weixinUserRepository.findById(openid).get();
             user.setMobile(mobileCode.mobile);
             weixinUserRepository.save(user);

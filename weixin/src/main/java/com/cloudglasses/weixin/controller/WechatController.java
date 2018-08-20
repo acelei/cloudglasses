@@ -1,9 +1,9 @@
 package com.cloudglasses.weixin.controller;
 
 import com.cloudglasses.model.SystemConfig;
-import com.cloudglasses.model.WeixinUser;
 import com.cloudglasses.repository.SystemConfigRepository;
 import com.cloudglasses.weixin.service.WeixinUserService;
+import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.api.WxConsts;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpMessageRouter;
@@ -15,9 +15,6 @@ import me.chanjar.weixin.mp.bean.result.WxMpUser;
 import me.chanjar.weixin.mp.bean.result.WxMpUserList;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,9 +29,8 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/wechat/portal")
+@Slf4j
 public class WechatController {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
     @Autowired
     private WxMpService wxService;
     @Autowired
@@ -53,7 +49,7 @@ public class WechatController {
             @RequestParam(name = "nonce", required = false) String nonce,
             @RequestParam(name = "echostr", required = false) String echostr) {
 
-        this.logger.info("\n接收到来自微信服务器的认证消息：[{}, {}, {}, {}]", signature,
+        log.info("\n接收到来自微信服务器的认证消息：[{}, {}, {}, {}]", signature,
                 timestamp, nonce, echostr);
 
         if (StringUtils.isAnyBlank(signature, timestamp, nonce, echostr)) {
@@ -76,7 +72,7 @@ public class WechatController {
                                required = false) String encType,
                        @RequestParam(name = "msg_signature",
                                required = false) String msgSignature) {
-        this.logger.info(
+        log.info(
                 "\n接收微信请求：[signature=[{}], encType=[{}], msgSignature=[{}],"
                         + " timestamp=[{}], nonce=[{}], requestBody=[\n{}\n] ",
                 signature, encType, msgSignature, timestamp, nonce, requestBody);
@@ -100,7 +96,7 @@ public class WechatController {
             WxMpXmlMessage inMessage = WxMpXmlMessage.fromEncryptedXml(
                     requestBody, this.wxService.getWxMpConfigStorage(), timestamp,
                     nonce, msgSignature);
-            this.logger.debug("\n消息解密后内容为：\n{} ", inMessage.toString());
+            log.debug("\n消息解密后内容为：\n{} ", inMessage.toString());
             WxMpXmlOutMessage outMessage = this.route(inMessage);
             if (outMessage == null) {
                 return "";
@@ -110,7 +106,7 @@ public class WechatController {
                     .toEncryptedXml(this.wxService.getWxMpConfigStorage());
         }
 
-        this.logger.debug("\n组装回复信息：{}", out);
+        log.debug("\n组装回复信息：{}", out);
 
         return out;
     }
@@ -123,7 +119,7 @@ public class WechatController {
                 String input = FileUtils.readFileToString(menuFile, "UTF-8");
                 wxService.getMenuService().menuCreate(input);
             } catch (IOException e) {
-                logger.error("读取菜单json错误", e);
+                log.error("读取菜单json错误", e);
             }
         }
         return "success";
@@ -159,13 +155,13 @@ public class WechatController {
             try {
                 title = wxService.getMaterialService().materialNewsInfo(mediaId).getArticles().get(0).getTitle();
             } catch (WxErrorException e) {
-                logger.error("获取素材失败", e);
+                log.error("获取素材失败", e);
             }
 
             return title + ":" + mediaId;
         }).collect(Collectors.toList());
 
-        logger.info(collect.toString());
+        log.info(collect.toString());
         return "success";
     }
 
@@ -173,16 +169,9 @@ public class WechatController {
         try {
             return this.router.route(message);
         } catch (Exception e) {
-            this.logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
 
         return null;
-    }
-
-    private WeixinUser getWeixinUser(WxMpUser userWxInfo) {
-        WeixinUser weixinUser = new WeixinUser();
-        BeanUtils.copyProperties(userWxInfo, weixinUser);
-
-        return weixinUser;
     }
 }

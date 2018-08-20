@@ -123,6 +123,10 @@ public class WeiXinConfig {
                 .content("1")
                 .handler(mobileHandler)
                 .end();
+        newRouter.rule().async(false)
+                .rContent("^[0-9]{4}$")
+                .handler(mobileHandler)
+                .end();
 
         // 默认事件
         newRouter.rule().async(false)

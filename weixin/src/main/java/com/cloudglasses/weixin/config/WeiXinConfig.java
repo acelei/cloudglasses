@@ -124,7 +124,7 @@ public class WeiXinConfig {
                 .handler(mobileHandler)
                 .end();
         newRouter.rule().async(false)
-                .rContent("^[0-9]{4}$")
+                .rContent("^[0-9]{6}$")
                 .handler(mobileHandler)
                 .end();
 

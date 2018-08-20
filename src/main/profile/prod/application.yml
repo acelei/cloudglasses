@@ -25,6 +25,9 @@ spring:
     initConnectionSqls: set NAMES utf8mb4;
   jpa:
     open-in-view: true
+  redis:
+    host: localhost
+    password: $3v5gppk9i*19tSK
 logging:
   level:
     com.cloudglasses: info

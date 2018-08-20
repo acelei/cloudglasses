@@ -13,22 +13,24 @@ import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlOutMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 
 @Component
 public class MobileHandler extends AbstractHandler {
-    public static Map<String, MobileCode> keyMap = new ConcurrentHashMap<>();
     @Autowired
     private WeixinUserRepository weixinUserRepository;
     @Autowired
     private OptometryDetailService optometryDetailService;
     @Autowired
     private SmsService smsService;
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Override
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage,
@@ -39,7 +41,7 @@ public class MobileHandler extends AbstractHandler {
         //判断用户是否在关联手机号
         String messageContent = wxMessage.getContent();
 
-        String REGEX_CODE = "^[0-9]{4}$";
+        String REGEX_CODE = "^[0-9]{6}$";
         if ("1".equals(messageContent) || Pattern.matches(REGEX_CODE, messageContent)) {
             return relationMobile(wxMessage, weixinService, openid, messageContent);
         } else {
@@ -67,7 +69,7 @@ public class MobileHandler extends AbstractHandler {
         String mobile = messageContent.replace("验光", "");
         if (ValidateUtile.isPhone(mobile)) {
             String code = CodeUtile.generateInt();
-            keyMap.put(openid, new MobileCode(code, mobile));
+            redisTemplate.opsForValue().set(openid, new MobileCode(code, mobile), 30, TimeUnit.SECONDS);
             smsService.sendCode(mobile, code);
             return new TextBuilder().build("请回复验证码", wxMessage, weixinService);
         } else {
@@ -90,7 +92,7 @@ public class MobileHandler extends AbstractHandler {
     private WxMpXmlOutMessage getMobileCodeByWeixinText(WxMpXmlMessage wxMessage, WxMpService weixinService, String openid, String messageContent) {
         String mobile = messageContent.replace("验光", "");
         if (ValidateUtile.isPhone(mobile)) {
-            keyMap.put(openid, new MobileCode(mobile, mobile));
+            redisTemplate.opsForValue().set(openid, new MobileCode(mobile, mobile), 30, TimeUnit.SECONDS);
             return new TextBuilder().build("请确认手机号码:" + mobile + ",如正确请回复:1", wxMessage, weixinService);
         } else {
             return new TextBuilder().build("手机号格式有误,请重新输入", wxMessage, weixinService);
@@ -107,9 +109,11 @@ public class MobileHandler extends AbstractHandler {
      * @return
      */
     private WxMpXmlOutMessage relationMobile(WxMpXmlMessage wxMessage, WxMpService weixinService, String openid, String messageContent) {
-        MobileCode mobileCode = keyMap.get(openid);
-        keyMap.remove(openid);
-        if (mobileCode != null && (messageContent.equalsIgnoreCase(mobileCode.key) || ("1".equalsIgnoreCase(messageContent) && mobileCode.key.equals(mobileCode.mobile)))) {
+        MobileCode mobileCode = (MobileCode) redisTemplate.opsForValue().get(openid);
+        boolean b = mobileCode != null && (messageContent.equalsIgnoreCase(mobileCode.key) ||
+                ("1".equalsIgnoreCase(messageContent) && mobileCode.key.equals(mobileCode.mobile)));
+        if (b) {
+            redisTemplate.delete(openid);
             WeixinUser user = weixinUserRepository.findById(openid).get();
             user.setMobile(mobileCode.mobile);
             weixinUserRepository.save(user);

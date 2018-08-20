@@ -26,6 +26,9 @@ spring:
   jpa:
     open-in-view: true
     show-sql: true
+  redis:
+    host: 192.144.175.184
+    password: $3v5gppk9i*19tSK
 logging:
   level:
     com.cloudglasses: info

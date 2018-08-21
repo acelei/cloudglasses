@@ -20,6 +20,7 @@ public class EntityConfig {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
         template.setKeySerializer(new StringRedisSerializer());
+        template.setHashKeySerializer(new StringRedisSerializer());
         template.setDefaultSerializer(new KryoSerializer<>());
 
         return template;

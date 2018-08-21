@@ -4,8 +4,6 @@ import me.chanjar.weixin.common.session.WxSessionManager;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlOutMessage;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -13,8 +11,6 @@ import java.util.Map;
 
 @Component
 public class MsgHandler extends AbstractHandler {
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
 
     @Override
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage,

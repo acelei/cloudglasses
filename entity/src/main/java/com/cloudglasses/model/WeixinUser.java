@@ -2,12 +2,14 @@ package com.cloudglasses.model;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Set;
 
 @Entity
+@DynamicUpdate
 @Data
 @Accessors(chain = true)
 public class WeixinUser implements Serializable {

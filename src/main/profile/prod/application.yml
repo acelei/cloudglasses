@@ -1,5 +1,14 @@
 server:
-  port: 80
+  port: 443
+  ssl:
+    key-password: cloudglasses2018
+    key-store: classpath:cloud-glasses.com.jks
+  http2:
+    enabled: true
+custom:
+  server:
+    http:
+      port: 80
 spring:
   http:
     encoding:

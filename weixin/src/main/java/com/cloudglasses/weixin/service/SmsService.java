@@ -15,7 +15,7 @@ public class SmsService {
 
 
     public void sendCode(String mobile, String code) throws Exception {
-        int smsVerificationTemplateId = 177321;
+        int smsVerificationTemplateId = 178789;
         SmsSingleSenderResult result = ssender.sendWithParam("86", mobile,
                 smsVerificationTemplateId, new String[]{code}, "", "", "");
         log.info(result.toString());

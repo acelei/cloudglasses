@@ -1,0 +1,34 @@
+{
+  "button": [
+    {
+      "type": "view",
+      "name": "网上商城",
+      "url": "https://j.youzan.com/iHwGnY"
+    },
+    {
+      "type": "click",
+      "name": "验光单",
+      "key": "B1001_OPTOMETRY"
+    },
+    {
+      "name": "服务中心",
+      "sub_button": [
+        {
+          "type": "view_limited",
+          "name": "眼镜养护",
+          "media_id": "jaDZNrsRk2oWeDpdVJ3tRVG6gjA92LCEH5vc2VsL-2I"
+        },
+        {
+          "type": "click",
+          "name": "联系客服",
+          "key": "B1002_CONNECTION"
+        },
+        {
+          "type": "click",
+          "name": "企业合作",
+          "key": "B1003_COOPERATION"
+        }
+      ]
+    }
+  ]
+}

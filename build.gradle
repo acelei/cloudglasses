@@ -68,24 +68,21 @@ allprojects {
         testCompile "org.springframework.boot:spring-boot-starter-test:$springBootVersion"
 
         // springboot热部署
-        compile "org.springframework.boot:spring-boot-devtools:$springBootVersion",
+        compile "org.springframework.boot:spring-boot:$springBootVersion",
+                "org.springframework.boot:spring-boot-devtools:$springBootVersion",
                 "org.springframework.boot:spring-boot-starter-web:$springBootVersion"
         // undertow支持
         runtime "org.springframework.boot:spring-boot-starter-undertow:$springBootVersion"
+
+        annotationProcessor 'org.projectlombok:lombok'
+        compileOnly 'org.projectlombok:lombok'
+
+        testAnnotationProcessor 'org.projectlombok:lombok'
+        testCompileOnly 'org.projectlombok:lombok'
     }
 
     jar {
         enabled = true
-    }
-
-    task createJavaProject << {
-        sourceSets*.java.srcDirs*.each { it.mkdirs() }
-        sourceSets*.resources.srcDirs*.each { it.mkdirs() }
-    }
-
-    task createWebProject(dependsOn: 'createJavaProject') << {
-        def webAppDir = file("$webAppDirName")
-        webAppDir.mkdirs()
     }
 }
 
@@ -97,4 +94,5 @@ subprojects {
 
 dependencies {
     compile project(':web')
+    compile project(':weixin')
 }

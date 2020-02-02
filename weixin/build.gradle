@@ -1,0 +1,7 @@
+dependencies {
+    compile project(':core')
+
+    compile "org.springframework.boot:spring-boot-autoconfigure:$springBootVersion"
+    compile "com.github.binarywang:weixin-java-mp:3.1.0"
+    compile "com.github.qcloudsms:qcloudsms:1.0.5"
+}

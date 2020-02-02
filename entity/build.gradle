@@ -1,7 +1,10 @@
 dependencies {
     compile "org.springframework.boot:spring-boot:$springBootVersion",
             "org.springframework.boot:spring-boot-starter-data-jpa:$springBootVersion",
-            'commons-io:commons-io:2.6'
+            "org.springframework.boot:spring-boot-starter-data-redis:$springBootVersion",
+            'commons-io:commons-io:2.6',
+            'com.esotericsoftware:kryo:4.0.2',
+            'de.javakaffee:kryo-serializers:0.42'
     // DB
     compile "mysql:mysql-connector-java:5.1.46",
             "com.alibaba:druid:1.1.10"

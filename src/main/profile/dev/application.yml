@@ -1,0 +1,43 @@
+server:
+  port: 80
+spring:
+  http:
+    encoding:
+      charset: utf-8
+  jackson:
+    date-format: yyyy-MM-dd
+    time-zone: GMT+8
+  datasource:
+    url: jdbc:mysql://192.144.175.184:3306/cloudglasses?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false
+    username: cloudglasses2018
+    password: J7QP6kEGbwY^stD5
+    initialSize: 2
+    maxActive: 10
+    minIdle: 1
+    maxWait: 60000
+    testOnBorrow: false
+    testOnReturn: false
+    testWhileIdle: true
+    timeBetweenEvictionRunsMillis: 30000
+    minEvictableIdleTimeMillis: 60000
+    validationQuery: SELECT 1
+    filters: wall,stat,slf4j,config
+    initConnectionSqls: set NAMES utf8mb4;
+  jpa:
+    open-in-view: true
+    show-sql: true
+  redis:
+    host: 192.144.175.184
+    password: $3v5gppk9i*19tSK
+logging:
+  level:
+    com.cloudglasses: info
+weixin:
+  appid: wxed50394fb45facbf
+  secret: ee4e8f0477efc0fd808554e03d907d49
+  token: cloudglasses2018
+  aesKey:
+sms:
+  appId: 1400128270
+  appKey: a65e78449f7f58b8146f08dfa02cca42
+  smsSign: 云镜

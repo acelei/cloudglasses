@@ -97,7 +97,7 @@ public class RedisUtile {
         while (iterator.hasNext()) {
             String k = iterator.next();
             if (getType(k) == DataType.ZSET) {
-//                log.debug("k:" + k);
+                log.debug("k:" + k);
                 map.put(k, getZSetRange(k));
             }
         }
@@ -1299,14 +1299,14 @@ public class RedisUtile {
                 boo = redisTemplate.boundSetOps(key).isMember(obj);
                 break;
             } catch (Exception e) {
-//                log.error("key[" + key + "],obj[" + obj + "]判断Set中的值是否存在失败,异常信息:" + e.getMessage());
+                log.error("key[" + key + "],obj[" + obj + "]判断Set中的值是否存在失败,异常信息:" + e.getMessage());
                 t++;
             }
             if (t > times) {
                 break;
             }
         }
-//        log.info("key[" + key + "],obj[" + obj + "]是否存在,boo:" + boo);
+        log.info("key[" + key + "],obj[" + obj + "]是否存在,boo:" + boo);
         return boo;
     }
 
